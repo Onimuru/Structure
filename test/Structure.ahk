@@ -100,15 +100,13 @@ exit
 ;============== Function ======================================================;
 
 Header(number1, number2) {
-	header := new Structure(8)
-	header.NumPut(0, "Int", number1, "Int", number2)
+	(header := new Structure(8)).NumPut(0, "Int", number1, "Int", number2)
 
 	return (header)
 }
 
 Body(number1, number2, number3, number4) {
-	body := new Structure(16)
-	body.NumPut(0, "Int", number1, "Int", number2, "Int", number3, "Int", number4)
+	(body := new Structure(16)).NumPut(0, "Int", number1, "Int", number2, "Int", number3, "Int", number4)
 
 	return (body)
 }
