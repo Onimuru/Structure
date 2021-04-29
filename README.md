@@ -28,8 +28,8 @@ y := struct.NumGet(4, "UInt")
 Create a new instance that will free it's allocated memory when deleted.
 
 ##### Arguments
-1. bytes (*): The number of bytes to be allocated.
-2. zeroFill (boolean): Whether the allocated memory will be initialized to zero, default is `False`.
+1. bytes: The number of bytes to be allocated.
+2. [Boolean] zeroFill: Whether the allocated memory will be initialized to zero, default is `False`.
 
 ##### Returns
 Returns an instance object with a `.Pointer` property that can be passed to `DllCall()`.
