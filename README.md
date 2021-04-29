@@ -3,12 +3,6 @@ Structure.ahk
 
 A structure management framework for AutoHotkey.
 
-## Installation
-
-```autohotkey
-#Include <Structure>
-```
-
 ## Usage
 
 Grants access to a class named `Structure` with the following methods: `.SizeOf()`
@@ -16,6 +10,7 @@ Grants access to a class named `Structure` with the following methods: `.SizeOf(
 and instances of `Structure` with the following methods: `.NumGet()`, `.NumPut()`, `.StrGet()`, `.StrPut()` and `.ZeroMemory()`
 
 ```autohotkey
+#Include <Structure>
 
 ; Create a new structure of 8 bytes in size:
 struct := new Structure(8)
