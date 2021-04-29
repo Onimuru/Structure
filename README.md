@@ -60,18 +60,21 @@ DllCall("User32\GetWindowRect", "Ptr", WinExist(), "Ptr", rect.Pointer, "UInt") 
 DllCall("User32\ClipCursor", "Ptr", rect.Pointer)  ; Pass the pointer to the block of memory contained in this struct to the ClipCursor function.
 ```
 
-### .Size
+### .Size[ := value]
+
+Retrieve the size of this struct or assign a new size. Assigning a new size is guaranteed to preserve the content of the memory being reallocated, even if the new memory is allocated at a different location.
 
 ##### Returns
-Returns the total size of the block of memory contained in this struct.
+1. Get: Returns the total size of the block of memory contained in this struct.
+2. Set: Returns the assigned value to allow chain assignment.
 
 ### .NumGet(offset, type, bytes)
 
 Retrieve a value from this struct at the given offset.
 
 ##### Arguments
-1. offset (*): 
-2. type (*): The data type to retrieve.
+1. offset: 
+2. type: The data type to retrieve.
 
 ##### Returns
 Returns the data at the specified address.
