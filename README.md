@@ -68,12 +68,12 @@ Retrieve the size of this struct or assign a new size. Assigning a new size is g
 1. Get: Returns the total size of the block of memory contained in this struct.
 2. Set: Returns the assigned value to allow chain assignment.
 
-### .NumGet(offset, type, bytes)
+### .NumGet(offset, type[, bytes])
 
 Retrieve a value from this struct at the given offset.
 
 ##### Arguments
-1. offset: 
+1. offset: The offset at which to start retrieving the data.
 2. type: The data type to retrieve.
 
 ##### Returns
