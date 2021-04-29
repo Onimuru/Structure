@@ -14,7 +14,7 @@ and instances of `Structure` with the following methods: `.NumGet()`, `.NumPut()
 
 ; Create a new structure of 8 bytes in size:
 struct := new Structure(8)
-struct.NumPut(0, "UInt", 69, "UInt", 96)
+struct.NumPut(0, "UInt", 69, "UInt", 96)  ; Insert [UInt] 69 at offset 0 and [UInt] 96 at offset 4 (the first 4 bytes are used by the first entry).
 
 x := struct.NumGet(0, "UInt")
 y := struct.NumGet(4, "UInt")
