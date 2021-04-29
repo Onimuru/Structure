@@ -40,7 +40,9 @@ Returns an instance object with a `.Pointer` property that can be passed to `Dll
 struct1 := new Structure(8, 1) 
 
 ; Create a new struct that is a copy of `struct1` (the copy points to a new block of memory and as such can have unique values):
-struct2 := new Structure(struct1)  
+struct2 := new Structure(struct1)
+
+struct1 := 0  ; `struct1` is deleted and it's memory is freed with the HeapFree function.
 ```
 
 ### .Pointer
