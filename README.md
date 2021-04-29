@@ -56,8 +56,8 @@ Returns the pointer to the block of memory contained in this struct.
 ```autohotkey
 rect := new Structure(16)
 
-DllCall("GetWindowRect", "Ptr", WinExist(), "Ptr", rect.Pointer, "UInt")  ; Retrieve the bounds of the active window into the `rect` struct.
-DllCall("user32\ClipCursor", "Ptr", rect.Pointer)  ; Pass the pointer to the block of memory contained in this struct to the ClipCursor function.
+DllCall("User32\GetWindowRect", "Ptr", WinExist(), "Ptr", rect.Pointer, "UInt")  ; Retrieve the bounds of the active window into the `rect` struct.
+DllCall("User32\ClipCursor", "Ptr", rect.Pointer)  ; Pass the pointer to the block of memory contained in this struct to the ClipCursor function.
 ```
 
 ### .Size
