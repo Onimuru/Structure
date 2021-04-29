@@ -27,6 +27,26 @@ y := struct.NumGet(4, "UInt")
 
 ## API
 
+### new Structure(bytes, [zeroFill])
+
+Create a new instance that will free it's allocated memory when deleted.
+
+##### Arguments
+1. bytes (*): The number of bytes to be allocated.
+2. zeroFill (boolean): Whether the allocated memory will be initialized to zero, default is `False`.
+
+##### Returns
+Returns an instance object with a `.Pointer` property that can be passed to `DllCall()`.
+
+##### Example
+```autohotkey
+; Create a struct of 8 bytes in size and initially filled with zeroes:
+struct1 := new Structure(8, 1) 
+
+; Create a new struct that is a copy of `struct1` but points to a new block of memory:
+struct2 := new Structure(struct1)  
+```
+
 ### .Pointer
 
 Alias: `.Ptr`
