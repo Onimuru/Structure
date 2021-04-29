@@ -47,10 +47,20 @@ struct2 := new Structure(struct1)
 
 Alias: `.Ptr`
 
+##### Returns
 Returns the pointer to the block of memory contained in this struct.
+
+##### Example
+```autohotkey
+rect := new Structure(16)
+
+DllCall("GetWindowRect", "Ptr", WinExist(), "Ptr", rect.Pointer, "UInt")  ; Retrieve the bounds of the active window into the `rect` struct.
+DllCall("user32\ClipCursor", "Ptr", rect.Pointer)  ; Pass the pointer to the block of memory contained in this struct to the ClipCursor function.
+```
 
 ### .Size
 
+##### Returns
 Returns the total size of the block of memory contained in this struct.
 
 ### .NumGet(offset, type, bytes)
