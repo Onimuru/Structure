@@ -12,6 +12,7 @@ A structure management framework for AutoHotkey.
 ## Usage
 
 Grants access to a class named `Structure` with the following methods: `.SizeOf()`
+
 and instances of `Structure` with the following methods: `.NumGet()`, `.NumPut()`, `.StrGet()`, `.StrPut()` and `.ZeroMemory()`
 
 ```autohotkey
