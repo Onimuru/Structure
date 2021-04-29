@@ -1,16 +1,5 @@
-﻿;============== Function ======================================================;  ;* ** Data Type Conversion: http://ahkscript.org/ursrc/Windows_Data_Types.html **
-
-;https://maul-esel.github.io/ahkbook/en/Structures.html
-
-;? PVOID --> UPtr
-;? DWORD --> UInt
-;? INT --> Int
-;? CHAR --> Char
-;? SHORT --> Short
-;? LONG --> Int
-;? LPCTSTR --> Str
-;? FLOAT --> Float
-
+﻿;============== Function ======================================================;
+ 
 ;* CreateCursorInfo()
 ;* Description:
 	;* Contains global cursor information.
@@ -154,7 +143,7 @@ CreateSize(width, height) {  ;: https://docs.microsoft.com/en-us/previous-versio
 ;===============  Class  =======================================================;
 
 Class Structure {
-	Static Heap := DllCall("Kernel32\GetProcessHeap", "Ptr")  ;! DllCall("Kernel32\HeapCreate", "UInt", 0x00000004, "Ptr", 0, "Ptr", 0, "Ptr")  ;? HEAP_CREATE_ENABLE_EXECUTE = 0x00040000, HEAP_GENERATE_EXCEPTIONS = 0x00000004
+	Static Heap := DllCall("Kernel32\GetProcessHeap", "Ptr")
 		, ThrowException := 1
 
 	;* new Structure(struct*)
@@ -287,21 +276,7 @@ Class Structure {
 
 			return (offset)  ;* Similar to `Push()` returning position of the last inserted value.
 		}
-
-		;! nth_char := NumGet(var, t_size(n-1), t_char())
-		;! NumPut(nth_char, var, t_size(n-1), t_char())
-
-		;! ; Define functions for convenience and clarity:
-		;! t_char() {
-		;!		return A_IsUnicode ? "UShort" : "Char"
-		;! }
-		;! t_size(char_count=1) {
-		;!		return A_IsUnicode ? char_count*2 : char_count
-		;! }
-
-		;? Str --> TCHAR*, LPTSTR, LPCTSTR (Equivalent to WStr in Unicode builds and AStr in ANSI builds.)
-		;? AStr (8-bit) --> CHAR*, LPSTR, LPCSTR (ANSI (The system default ANSI code page.))
-		;? WStr (16-bit) --> WCHAR_T*, WCHAR*, LPWSTR, LPCWSTR (UTF-16)
+		
 		StrGet(length := "", encoding := "") {
 			if (length) {
 				return (StrGet(this.Pointer, length, encoding))
@@ -320,44 +295,3 @@ Class Structure {
 		}
 	}
 }
-
-;Char: An 8-bit integer, whose range is -128 (-0x80) to 127 (0x7F)
-;Short: A 16-bit integer, whose range is -32768 (-0x8000) to 32767 (0x7FFF)
-;Int: A 32-bit integer (the most common integer type), whose range is -2147483648 (-0x80000000) to 2147483647 (0x7FFFFFFF)
-;Int64: A 64-bit integer, whose range is -9223372036854775808 (-0x8000000000000000) to 9223372036854775807 (0x7FFFFFFFFFFFFFFF)
-
-;UChar: An 8-bit integer, whose range is 0 to 255 (0xFF)
-;UShort: A 16-bit integer, whose range is 0 0 to 65535 (0xFFFF)
-;UInt: A 32-bit integer, whose range is 0 to 4294967295 (0xFFFFFFFF)
-;UInt64: A 64-bit integer, whose range is 0 to 18446744073709551615 (0xFFFFFFFFFFFFFFFF)
-
-;alternative names (signed):
-;1 byte: Char
-;2 bytes: Short
-;4 bytes: Int / Long
-;8 bytes: Int64
-
-;alternative names (unsigned):
-;1 byte: UChar / Byte
-;2 bytes: UShort / ULong / Word
-;4 bytes: UInt / DWord
-;8 bytes: UInt64 / QWord
-
-;note:
-;the 'U' prefix for unsigned integers
-
-;note also:
-;Ptr (e.g. LPARAM) and UPtr (e.g. WPARAM):
-;Ptr: A pointer-sized integer, equivalent to Int or Int64 depending on whether the exe running the script is 32-bit or 64-bit
-;UPtr: A pointer-sized integer, equivalent to UInt or UInt64 (also depending on the script's bitness)
-
-;note also:
-;Float and Double, which are covered in a later section
-;Float: 'A 32-bit floating point number, which provides 6 digits of precision.'
-;Double: 'A 64-bit floating point number, which provides 15 digits of precision.'
-
-;VarSetCapacity(POINT, 8)
-;DllCall("user32\GetCursorPos", "Ptr",&POINT)
-
-;VarSetCapacity(RECT, 16)
-;DllCall("user32\GetWindowRect", "Ptr",hWnd, "Ptr",&RECT)
