@@ -43,7 +43,7 @@ Returns an instance object with a `.Pointer` property that can be passed to `Dll
 ; Create a struct of 8 bytes in size and initially filled with zeroes:
 struct1 := new Structure(8, 1) 
 
-; Create a new struct that is a copy of `struct1` but points to a new block of memory:
+; Create a new struct that is a copy of `struct1` (the copy points to a new block of memory and as such can have unique values):
 struct2 := new Structure(struct1)  
 ```
 
