@@ -23,6 +23,7 @@ y := struct.NumGet(4, "UInt")
 ## API
 
 ### new Structure(bytes, [zeroFill])
+### new Structure(struct, struct, ...)
 
 Create a new instance that will free it's allocated memory when deleted.
 
