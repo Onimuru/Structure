@@ -86,11 +86,11 @@ loop, % (size := struct.Size)//4 {
 Assert.IsEqual(contents012, "1, 2, 3, 4, 5")  ;* Test that the values were inserted correctly.
 
 Assert.SetLabel("013")
-struct := new Structure(Header(1, 2), Body(3, 4, 5, 6))  ;* Create a new struct from an array.
+struct := new Structure(Header(1, 2), Body(3, 4, 5, 6))  ;* Create a new struct from two other structs.
 loop, % (size := struct.Size)//4 {
 	contents013 .= NumGet(struct.Pointer + (A_Index - 1)*4, "Int") . ((A_Index < size//4) ? (", ") : (""))
 }
-Assert.IsEqual(contents013, "1, 2, 3, 4, 5, 6")  ;* Test that the values were inserted correctly.
+Assert.IsEqual(contents013, "1, 2, 3, 4, 5, 6")  ;* Test that the data was coppied correctly.
 
 Assert.Report()
 
