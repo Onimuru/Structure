@@ -22,6 +22,15 @@ CreateSecurityDescriptor() {  ;: https://docs.microsoft.com/en-us/windows/win32/
     return (s)
 }  ;? SECURITY_DESCRIPTOR, *PISECURITY_DESCRIPTOR;
 
+;* CreateGDIplusStartupInput()
+;* Description:
+	;* The GdiplusStartupInput structure holds a block of arguments that are required by the GdiplusStartup function.
+CreateGDIplusStartupInput() {  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusinit/ns-gdiplusinit-gdiplusstartupinput
+	(s := new Structure(8 + A_PtrSize*2)).NumPut(0, "UInt", 0x1)
+
+    return (s)
+}
+
 ;* CreateConsoleReadConsoleControl(initialChars, ctrlWakeupMask, controlKeyState)
 ;* Description:
 	;* Contains information for a console read operation.
