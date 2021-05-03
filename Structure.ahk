@@ -50,7 +50,7 @@ CreateCoord(x := 0, y := 0) {  ;: https://docs.microsoft.com/en-us/windows/conso
 	(s := new Structure(4)).NumPut(0, "Short", x, "Short", y)
 
 	Static f := Func("NumGet")
-	p := s.Pointer
+	p := s.Ptr
 		, s.Fields := {"x": f.Bind(p, 0, "Short"), "y": f.Bind(p, 2, "Short")}
 
     return (s)
@@ -64,7 +64,7 @@ CreatePoint(x := 0, y := 0, type := "UInt") {  ;: https://docs.microsoft.com/en-
 		, (s := new Structure(b*2)).NumPut(0, type, x, type, y)
 
 	Static f := Func("NumGet")
-	p := s.Pointer
+	p := s.Ptr
 		, s.Fields := {"x": f.Bind(p, 0, type), "y": f.Bind(p, b, type)}
 
     return (s)
@@ -78,7 +78,7 @@ CreateRect(x := 0, y := 0, width := 0, height := 0, type := "UInt") {  ;: https:
 		, (s := new Structure(b*4)).NumPut(0, type, x, type, y, type, width, type, height)
 
 	Static f := Func("NumGet")
-	p := s.Pointer
+	p := s.Ptr
 		, s.Fields := {"x": f.Bind(p, 0, type), "y": f.Bind(p, b, type), "width": f.Bind(p, b*2, type), "height": f.Bind(p, b*3, type)}
 
 	return (s)
@@ -134,7 +134,7 @@ CreateSize(width, height) {  ;: https://docs.microsoft.com/en-us/previous-versio
 	(s := new Structure(8)).NumPut(0, "Int", width, "Int", height)
 
 	Static f := Func("NumGet")
-	p := s.Pointer
+	p := s.Ptr
 		, s.Fields := {"Width": f.Bind(p, 0, "Int"), "Height": f.Bind(p, 4, "Int")}
 
 	return (s)
@@ -157,7 +157,7 @@ Class Structure {
 				throw (Exception("Invalid Assignment", -1, Format("""{}"" is invalid. This value must be a non negative integer.", Print(bytes))))
 			}
 
-			return ({"Pointer": DllCall("Kernel32\HeapAlloc", "Ptr", this.Heap, "UInt", 0x00000008, "Ptr", bytes, "Ptr")  ;* ** Heap allocations made by calling the malloc and HeapAlloc functions are non-executable. **
+			return ({"Ptr": DllCall("Kernel32\HeapAlloc", "Ptr", this.Heap, "UInt", 0x00000008, "Ptr", bytes, "Ptr")  ;* ** Heap allocations made by calling the malloc and HeapAlloc functions are non-executable. **
 
 				, "Base": this.__Structure})
 		}
@@ -186,7 +186,7 @@ Class Structure {
 						}
 					}
 
-					(instance := {"Pointer": DllCall("Kernel32\HeapAlloc", "Ptr", this.Heap, "UInt", 0, "Ptr", bytes, "Ptr")
+					(instance := {"Ptr": DllCall("Kernel32\HeapAlloc", "Ptr", this.Heap, "UInt", 0, "Ptr", bytes, "Ptr")
 
 						, "Base": this.__Structure}).NumPut(0, params*)
 
@@ -203,7 +203,7 @@ Class Structure {
 			throw (Exception("!!!"))
 		}
 
-		for index, value in (array, size := this.SizeOf(type), struct := new this(array.Length*size), pointer := struct.Pointer) {
+		for index, value in (array, size := this.SizeOf(type), struct := new this(array.Length*size), pointer := struct.Ptr) {
 			NumPut(value, pointer + size*index, type)
 		}
 
@@ -221,10 +221,10 @@ Class Structure {
 			bytes += size
 		}
 
-		for i, struct in (params, pointer := (instance := new this(bytes)).Pointer) {
+		for i, struct in (params, pointer := (instance := new this(bytes)).Ptr) {
 			size := struct.Size
 
-			DllCall("NtDll\RtlCopyMemory", "Ptr", pointer, "Ptr", struct.Pointer, "Ptr", size), pointer += size
+			DllCall("NtDll\RtlCopyMemory", "Ptr", pointer, "Ptr", struct.Ptr, "Ptr", size), pointer += size
 		}
 
 		return (instance)
@@ -249,7 +249,7 @@ Class Structure {
 	Class __Structure {
 
 		__Delete() {
-			DllCall("Kernel32\HeapFree", "Ptr", Structure.Heap, "UInt", 0, "Ptr", this.Pointer, "UInt")
+			DllCall("Kernel32\HeapFree", "Ptr", Structure.Heap, "UInt", 0, "Ptr", this.Ptr, "UInt")
 		}
 
 		__Get(key) {
@@ -258,19 +258,13 @@ Class Structure {
 			}
 		}
 
-		Ptr[] {
-			Get {
-				return (this.Pointer)
-			}
-		}
-
 		Size[] {
 			Get {
-				return (DllCall("Kernel32\HeapSize", "Ptr", Structure.Heap, "UInt", 0, "Ptr", this.Pointer, "Ptr"))
+				return (DllCall("Kernel32\HeapSize", "Ptr", Structure.Heap, "UInt", 0, "Ptr", this.Ptr, "Ptr"))
 			}
 
 			Set {
-				if (!(this.Pointer := DllCall("Kernel32\HeapReAlloc", "Ptr", Structure.Heap, "UInt", 0x00000008, "Ptr", this.Pointer, "Ptr", value, "Ptr"))) {  ;* ** If HeapReAlloc fails, the original memory is not freed, and the original handle and pointer are still valid. **
+				if (!(this.Ptr := DllCall("Kernel32\HeapReAlloc", "Ptr", Structure.Heap, "UInt", 0x00000008, "Ptr", this.Ptr, "Ptr", value, "Ptr"))) {  ;* ** If HeapReAlloc fails, the original memory is not freed, and the original handle and pointer are still valid. **
 					throw (Exception("Critical Failue", -1, Format("Kernel32\HeapReAlloc failed to allocate memory.")))
 				}
 
@@ -286,7 +280,7 @@ Class Structure {
 			if (type == "Struct" && bytes == Round(bytes) && bytes >= 0) {  ;* Create and return a new struct from a slice of another.
 				if (offset + bytes < this.Size) {  ;* Ensure that the memory from `offset` to `offset + bytes` is part of this struct.
 					struct := new Structure(bytes)
-					DllCall("NtDll\RtlCopyMemory", "Ptr", struct.Pointer, "Ptr", this.Pointer + offset, "Ptr", bytes)
+					DllCall("NtDll\RtlCopyMemory", "Ptr", struct.Ptr, "Ptr", this.Ptr + offset, "Ptr", bytes)
 
 					return (struct)
 				}
@@ -294,7 +288,7 @@ Class Structure {
 				return  ;~ No error handling.
 			}
 
-			return (NumGet(this.Pointer + offset, type))
+			return (NumGet(this.Ptr + offset, type))
 		}
 
 		NumPut(offset, params*) {
@@ -302,7 +296,7 @@ Class Structure {
 				throw (Exception("Invalid Assignment", -1, Format("""{}"" is invalid. This value must be a non negative integer.", offset)))
 			}
 
-			loop, % (params.Length()//2, pointer := this.Pointer) {
+			loop, % (params.Length()//2, pointer := this.Ptr) {
 				index := A_Index*2
 					, type := params[index - 1], value := params[index]
 
@@ -311,7 +305,7 @@ Class Structure {
 						, bytes := (size > limit) ? (limit) : (size)  ;* Ensure that there is capacity left after accounting for the offset. It is entirely possible to insert a type that exceeds 2 bytes in size into the last 2 bytes of this struct's memory however, thereby corrupting the value.
 
 					if (bytes) {
-						DllCall("NtDll\RtlCopyMemory", "Ptr", pointer + offset, "Ptr", value.Pointer, "Ptr", bytes), offset += bytes
+						DllCall("NtDll\RtlCopyMemory", "Ptr", pointer + offset, "Ptr", value.Ptr, "Ptr", bytes), offset += bytes
 					}
 				}
 				else {
@@ -331,10 +325,10 @@ Class Structure {
 
 		StrGet(length := "", encoding := "") {
 			if (length) {
-				return (StrGet(this.Pointer, length, encoding))
+				return (StrGet(this.Ptr, length, encoding))
 			}
 
-			return (StrGet(this.Pointer))
+			return (StrGet(this.Ptr))
 		}
 
 		ZeroMemory(bytes := 0) {
@@ -343,7 +337,7 @@ Class Structure {
 			size := this.Size
 				, bytes := (bytes) ? ((bytes > size) ? (size) : (bytes)) : (this.Size)
 
-			DllCall("Ntdll\RtlZeroMemory", "Ptr", this.Pointer, "Ptr", bytes)
+			DllCall("Ntdll\RtlZeroMemory", "Ptr", this.Ptr, "Ptr", bytes)
 		}
 	}
 }
