@@ -5,10 +5,10 @@
 	;* Contains global cursor information.
 CreateCursorInfo(flags := 0, cursor := 0, screenPos := 0) {  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-cursorinfo
 	if (!screenPos) {
-		screenPos := CreatePoint()
+		screenPos := CreatePoint(0, 0, "UInt")
 	}
 
-	(s := new Structure(16 + A_PtrSize)).NumPut(0, "UInt", 16 + A_PtrSize, "UInt", flags, "Ptr", cursor, "UInt", screenPos, "Struct", screenPos)
+	(s := new Structure(16 + A_PtrSize)).NumPut(0, "UInt", 16 + A_PtrSize, "UInt", flags, "Ptr", cursor, "Struct", screenPos)
 
     return (s)
 }  ;? CURSORINFO, *PCURSORINFO, *LPCURSORINFO;
@@ -58,10 +58,6 @@ CreateSmallRect(x := 0, y := 0, width := 0, height := 0) {  ;: https://docs.micr
 CreateCoord(x := 0, y := 0) {  ;: https://docs.microsoft.com/en-us/windows/console/coord-str
 	(s := new Structure(4)).NumPut(0, "Short", x, "Short", y)
 
-	Static f := Func("NumGet")
-	p := s.Ptr
-		, s.Fields := {"x": f.Bind(p, 0, "Short"), "y": f.Bind(p, 2, "Short")}
-
     return (s)
 }  ;? COORD, *PCOORD;
 
@@ -71,10 +67,6 @@ CreateCoord(x := 0, y := 0) {  ;: https://docs.microsoft.com/en-us/windows/conso
 CreatePoint(x := 0, y := 0, type := "UInt") {  ;: https://docs.microsoft.com/en-us/windows/win32/api/windef/ns-windef-point
 	b := Structure.ValidateType(type)
 		, (s := new Structure(b*2)).NumPut(0, type, x, type, y)
-
-	Static f := Func("NumGet")
-	p := s.Ptr
-		, s.Fields := {"x": f.Bind(p, 0, type), "y": f.Bind(p, b, type)}
 
     return (s)
 }  ;? POINT, *PPOINT, *NPPOINT, *LPPOINT;
@@ -86,10 +78,6 @@ CreateRect(x := 0, y := 0, width := 0, height := 0, type := "UInt") {  ;: https:
 	b := Structure.ValidateType(type)
 		, (s := new Structure(b*4)).NumPut(0, type, x, type, y, type, width, type, height)
 
-	Static f := Func("NumGet")
-	p := s.Ptr
-		, s.Fields := {"x": f.Bind(p, 0, type), "y": f.Bind(p, b, type), "width": f.Bind(p, b*2, type), "height": f.Bind(p, b*3, type)}
-
 	return (s)
 }  ;? RECT, *PRECT, *NPRECT, *LPRECT;
 
@@ -97,7 +85,7 @@ CreateRect(x := 0, y := 0, width := 0, height := 0, type := "UInt") {  ;: https:
 ;* Description:
 	;* The BitmapData class stores attributes of a bitmap.
 CreateBitmapData(width := 0, height := 0, stride := 0, pixelFormat := 0x26200A, scan0 := 0) {  ;: https://docs.microsoft.com/en-us/previous-versions/ms534421(v=vs.85)
-	(s := new Structure(16 + 2*A_PtrSize)).NumPut(0, "UInt", width, "UInt", height, "Int", stride, "Int", pixelFormat, "Ptr", scan0)
+	(s := new Structure(16 + A_PtrSize*2)).NumPut(0, "UInt", width, "UInt", height, "Int", stride, "Int", pixelFormat, "Ptr", scan0)
 
 	return (s)
 }  ;? BITMAPDATA;
@@ -113,7 +101,7 @@ CreateBitmapInfo(bmiHeader, bmiColors) {  ;: https://docs.microsoft.com/en-us/wi
 ;* Description:
 	;* The BITMAPINFOHEADER structure contains information about the dimensions and color format of a DIB.
 CreateBitmapInfoHeader(width, height, bitCount := 32, compression := 0x0000, sizeImage := 0, xPelsPerMeter := 0, yPelsPerMeter := 0, clrUsed := 0, clrImportant := 0) {  ;: https://docs.microsoft.com/en-us/previous-versions/dd183376(v=vs.85)
-	(s := new Structure(40)).NumPut(0, "UInt", 40, "Int", width, "Int", height, "UShort", 1, "UShort", bitCount, "UInt", compression, "UInt", sizeImage, "Int", xPelsPerMeter, "Int", yPelsPerMeter, "UInt", biClrUsed, "UInt", clrImportant)
+	s := new Structure("UInt", 40, "Int", width, "Int", height, "UShort", 1, "UShort", bitCount, "UInt", compression, "UInt", sizeImage, "Int", xPelsPerMeter, "Int", yPelsPerMeter, "UInt", clrUsed, "UInt", clrImportant)
 
 	return (s)
 }  ;? BITMAPINFOHEADER, *PBITMAPINFOHEADER;
@@ -141,10 +129,6 @@ CreateRGBQuad(blue := 0, green := 0, red := 0) {  ;: https://docs.microsoft.com/
 	;* The SIZE structure specifies the width and height of a rectangle.
 CreateSize(width, height) {  ;: https://docs.microsoft.com/en-us/previous-versions//dd145106(v=vs.85)
 	(s := new Structure(8)).NumPut(0, "Int", width, "Int", height)
-
-	Static f := Func("NumGet")
-	p := s.Ptr
-		, s.Fields := {"Width": f.Bind(p, 0, "Int"), "Height": f.Bind(p, 4, "Int")}
 
 	return (s)
 }  ;? SIZE, *PSIZE;
@@ -249,7 +233,7 @@ Class Structure {
 		Local
 
 		if (!size := this.SizeOf(type)) {
-			throw
+			throw (Exception("Critical Failue", -2, "ValidateType failed."))
 		}
 
 		return (size)
