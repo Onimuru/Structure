@@ -245,12 +245,6 @@ Class Structure {
 			DllCall("Kernel32\HeapFree", "Ptr", Structure.Heap, "UInt", 0, "Ptr", this.Ptr, "UInt")
 		}
 
-		__Get(key) {
-			if (this.HasKey("Fields")) {
-				return (ObjRawGet(this, "Fields")[key].Call())
-			}
-		}
-
 		Size[] {
 			Get {
 				return (DllCall("Kernel32\HeapSize", "Ptr", Structure.Heap, "UInt", 0, "Ptr", this.Ptr, "Ptr"))
