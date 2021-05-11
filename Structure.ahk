@@ -1,4 +1,4 @@
-﻿;============== Function ======================================================;
+﻿;============== Function ======================================================;  ;* ** MSDN_Types: https://github.com/jNizM/AutoHotkey_MSDN_Types/blob/master/src/Windows_Data_Types.txt **
 
 ;* CreateCursorInfo()
 ;* Description:
