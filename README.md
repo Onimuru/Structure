@@ -82,7 +82,7 @@ Retrieve a value from this struct at the given offset.
 
 ##### Example
 ```autohotkey
-struct := new Structure(8)
+struct := Structure(8)
 struct.NumPut(0, "UShort", 1, "Float", 2)
 
 MsgBox(struct.NumGet(2, "Float"))  ; Retrieve the Float (4 bytes) at offset 2 (the first byte after the UShort entry).
