@@ -57,7 +57,7 @@ The pointer to the block of memory where the data owned by this struct is held.
 
 ##### Example
 ```autohotkey
-rect := new Structure(16)
+rect := Structure(16)
 
 DllCall("User32\GetWindowRect", "Ptr", WinExist(), "Ptr", rect.Ptr, "UInt")  ; Retrieve the bounds of the active window into the `rect` struct.
 DllCall("User32\ClipCursor", "Ptr", rect.Ptr)  ; Pass the pointer to the block of memory contained in this struct to the ClipCursor function.
@@ -78,7 +78,7 @@ Retrieve a value from this struct at the given offset.
 3. [Integer] bytes: The number of bytes to copy into a structure. This only applies if `type` is `"Struct"`.
 
 ##### Return
-Returns the data at the specified address or if `type` is `"Struct"`, a new instance with `bytes` of data copied into it.
+[*]: Returns the data at the specified address or if `type` is `"Struct"`, a new instance with `bytes` of data copied into it.
 
 ##### Example
 ```autohotkey
