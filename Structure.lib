@@ -1,4 +1,4 @@
-﻿;============== Function ======================================================;  ;* ** MSDN_Types: https://github.com/jNizM/AutoHotkey_MSDN_Types/blob/master/src/Windows_Data_Types.txt **
+﻿;============== Function ======================================================;
 
 ;* CreateCursorInfo()
 ;* Description:
@@ -243,6 +243,12 @@ Class Structure {
 
 		__Delete() {
 			DllCall("Kernel32\HeapFree", "Ptr", Structure.Heap, "UInt", 0, "Ptr", this.Ptr, "UInt")
+		}
+
+		__Get(key) {
+			if (this.HasKey("Fields")) {
+				return (ObjRawGet(this, "Fields")[key].Call())
+			}
 		}
 
 		Size[] {
