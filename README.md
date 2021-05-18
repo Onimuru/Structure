@@ -1,113 +1,108 @@
-Structure.ahk
-===========
+# Structure.ahk
 
-A structure management framework for AutoHotkey.
+A structure management framework for AutoHotkey v2.0.
 
-## Usage
+## Functions
 
-Grants access to a class named `Structure` with the following methods: `.CreateFromArray()`, `.CreateFromStruct()`, `.SizeOf()`
+#### `StructureFromArray(array[, type])`
+Create a structure and appends each value in an array to it.
 
-and instances of `Structure` with the following methods: `.NumGet()`, `.NumPut()`, `.StrGet()`, `.StrPut()` and `.ZeroMemory()`
-
-```autohotkey
-#Include <Structure>
-
-; Create a new structure of 8 bytes in size:
-struct := new Structure(8)
-struct.NumPut(0, "UInt", 69, "UInt", 96)  ; Insert [UInt] 69 at offset 0 and [UInt] 96 at offset 4 (the first 4 bytes are used by the first entry).
-
-x := struct.NumGet(0, "UInt")
-y := struct.NumGet(4, "UInt")
-```
-
-## API
-
-### `new Structure(bytes)`
-### `new Structure(array[, type])`
-### `new Structure(struct, struct, ...)`
-### `new Structure(type, value, type, value, ...)`
-
-Create a new instance with zero-filled memory that will be freed when this object is deleted.
-
-##### Arguments
-1. bytes: The number of bytes to be allocated.
+##### Parameters
+1. [Array] array: The result value computed. Objects by themselves are automatically converted to string.
+2. [String] type: Data type to use when inserting a given value. Defaults to `"UInt"`.
 
 ##### Return
-Returns an instance object with a `.Pointer` property that can be passed to `DllCall()`.
+[Structure]: A new structure instance with a `.Ptr` property.
+
+#### `StructureFromStructure(structs*)`
+Create a structure and copies the data from each struct passed into it.
+
+##### Parameters
+1. [Structure] structs*: Any number of structure to concatenate into a new structure. The memory will be a copy, not shared.
+
+##### Return
+[Structure]: A new structure instance with a `.Ptr` property.
+
+## Static methods
+
+#### `Structure(bytes[, zero])`
+Creates a new structure instance.
+
+##### Parameters
+1. [Integer] bytes: The size of the structure.
+1. [Bool] zero: Initiate the memory with 0.
+
+##### Return
+[Structure]: A new structure instance with a `.Ptr` property.
 
 ##### Example
 ```autohotkey
 ; Create a struct of 8 bytes in size and initially filled with zeroes:
-struct1 := new Structure(8, 1) 
-
-; Create a new struct that is a copy of `struct1` (the copy points to a new block of memory and as such can have unique values):
-struct2 := new Structure(struct1)
-
-struct1 := 0  ; `struct1` is deleted and it's memory is freed with the HeapFree function.
+struct1 := Structure(8, 1) 
 ```
 
-### `.Pointer`
-Alias: `.Ptr`
+#### `Structure.SizeOf(type)`
+Determines how many bytes `type` is in size.
+
+##### Parameters
+1. [String] type: Any number of structure to concatenate into a new structure. The memory will be a copy, not shared.
 
 ##### Return
-Returns the pointer to the block of memory contained in this struct.
+[Integer]: The size of `type` in bytes.
+
+## Instance properties
+
+#### `struct.Ptr`
+The pointer to the block of memory where the data owned by this struct is held.
 
 ##### Example
 ```autohotkey
-rect := new Structure(16)
+rect := Structure(16)
 
-DllCall("User32\GetWindowRect", "Ptr", WinExist(), "Ptr", rect.Pointer, "UInt")  ; Retrieve the bounds of the active window into the `rect` struct.
-DllCall("User32\ClipCursor", "Ptr", rect.Pointer)  ; Pass the pointer to the block of memory contained in this struct to the ClipCursor function.
+DllCall("User32\GetWindowRect", "Ptr", WinExist(), "Ptr", rect.Ptr, "UInt")  ; Retrieve the bounds of the active window into the `rect` struct.
+DllCall("User32\ClipCursor", "Ptr", rect.Ptr)  ; Pass the pointer to the block of memory contained in this struct to the ClipCursor function.
 ```
 
-### `.Size[ := value]`
+#### `struct.Size[ := bytes]`
+1. Get: How many bytes belong to this structure.
+2. Set: Resize the structure.
 
-Retrieve the size of this struct or assign a new size. Assigning a new size is guaranteed to preserve the content of the memory being reallocated, even if the new memory is allocated at a different location.
+## Instance methods
 
-##### Return
-
-##### Get
-
-Returns the total size of the block of memory contained in this struct.
-
-##### Set
-
-Returns the assigned value to allow chain assignment.
-
-### `.NumGet(offset, type[, bytes])`
-
+#### `struct.NumGet(offset, type[, bytes])`
 Retrieve a value from this struct at the given offset.
 
 ##### Arguments
-1. offset: The offset at which to start retrieving the data.
-2. type: The data type to retrieve.
+1. [Integer] offset: The offset at which to start retrieving the data.
+2. [String] type: The data type to retrieve.
+3. [Integer] bytes: The number of bytes to copy into a structure. This only applies if `type` is `"Struct"`.
 
 ##### Return
-Returns the data at the specified address.
+[*]: Returns the data at the specified address or if `type` is `"Struct"`, a new instance with `bytes` of data copied into it.
 
 ##### Example
 ```autohotkey
-struct := new Structure(8)
+struct := Structure(8)
 struct.NumPut(0, "UShort", 1, "Float", 2)
 
-MsgBox, % struct.NumGet(2, "Float")  ; Retrieve the Float (4 bytes) at offset 2 (the first byte after the UShort entry).
+MsgBox(struct.NumGet(2, "Float"))  ; Retrieve the Float (4 bytes) at offset 2 (the first byte after the UShort entry).
 ```
 
-### `.NumPut(offset, type, value, type, value, ...)`
-
-Insert any number of values into this struct but not exceeding the size allocated when it was created.
+#### `struct.NumPut(offset, type, value, type, value, ...)`
+Retrieve a value from this struct at the given offset.
 
 ##### Arguments
-1. offset (*): The offset at which the first entry will be inserted.
-2. value (*): The value to insert.
+1. [Integer] offset: The offset at which to start inserting data.
+2. [String] type: The data type to inserting.
+3. [Any] value: `value` is inserted at `offset` and any additional `value` parameters are inserted at `offset` + the number of bytes taken up by preceding entries.
 
 ##### Return
-Returns the next byte in this struct after all values have been added.
+[Integer]: The next available byte in address space after all values have been inserted.
 
 ##### Example
 ```autohotkey
-struct := new Structure(12 + A_PtrSize)  ; A_PtrSize = 8 on 64-bit and 4 on 32-bit.
-struct.NumPut(0, "Int", 1, "Int", 2, "Int", 3)
+struct := Structure(8)
+struct.NumPut(0, "UShort", 1, "Float", 2)
 
-struct.NumPut(8, "Float", 3.14159, "Ptr", A_ScriptHwnd)  ; Overwrite the value at offset 8 and insert a handle at offset 12.
+MsgBox(struct.NumGet(2, "Float"))  ; Retrieve the Float (4 bytes) at offset 2 (the first byte after the UShort entry).
 ```
