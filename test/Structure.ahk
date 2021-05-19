@@ -9,10 +9,10 @@ ProcessSetPriority("Normal")
 
 ;======================================================  Include  ==============;
 
-#Include %A_ScriptDir%\..\..\Core.ahk
+#Include %A_ScriptDir%\..\..\Core.lib
 
-#Include %A_ScriptDir%\..\..\Assert\Assert.ahk
-#Include %A_ScriptDir%\..\..\Console\Console.ahk
+#Include %A_ScriptDir%\..\..\Assert\Assert.lib
+#Include %A_ScriptDir%\..\..\Console\Console.lib
 
 ;======================================================== Test ================;
 
@@ -100,7 +100,7 @@ loop ((size := struct.Size)//4) {
 }
 Assert.IsEqual(contents013, "1, 2, 3, 4, 5, 6")  ;* Test that the data was coppied correctly.
 
-Console.Write(Assert.CreateReport())
+Console.Log(Assert.CreateReport())
 
 exit
 

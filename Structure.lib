@@ -1,6 +1,6 @@
 ﻿/*
-	** MSDN_Types: https://github.com/jNizM/AutoHotkey_MSDN_Types/blob/master/src/Windows_Data_Types.txt. **
-	** MSDN_Structs: https://www.autohotkey.com/boards/viewtopic.php?f=74&t=30497. **
+** MSDN_Types: https://github.com/jNizM/AutoHotkey_MSDN_Types/blob/master/src/Windows_Data_Types.txt. **
+** MSDN_Structs: https://www.autohotkey.com/boards/viewtopic.php?f=74&t=30497. **
 */
 
 ;============ Auto-execute ====================================================;
@@ -34,15 +34,11 @@ StructureFromStructure(structs*) {
 		throw (TypeError(Format("{} is invalid.", Print(structs)), -1, "This function only accepts parameters of type: Structure."))
 	}
 
-	bytes := 0
-
-	for struct in structs {
+	for struct in (bytes := 0, structs) {
 		bytes += struct.Size
 	}
 
-	pointer := (instance := Structure(bytes)).Ptr
-
-	for struct in structs {
+	for struct in (pointer := (instance := Structure(bytes)).Ptr, structs) {
 		DllCall("NtDll\RtlCopyMemory", "Ptr", pointer, "Ptr", struct.Ptr, "Ptr", size := struct.Size), pointer += size
 	}
 
@@ -60,157 +56,170 @@ Class Structure {
 		return (sizeLookup[type])
 	}
 
+	;* Structure.CreateWndClassEx(style, lpfnWndProc, cbClsExtra, cbWndExtra, hInstance, hIcon, hCursor, hbrBackground, lpszMenuName, lpszClassName, hIconSm)
+	;* Description:
+		;* See https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-wndclassexa.
+	;* Parameter:
+		;* style - See https://docs.microsoft.com/en-us/windows/win32/winmsg/window-class-styles.
+	static CreateWndClassEx(style, lpfnWndProc, cbClsExtra, cbWndExtra, hInstance, hIcon, hCursor, hbrBackground, lpszMenuName, lpszClassName, hIconSm) {
+		(s := Structure(cbSize := ((A_PtrSize == 8) ? (80) : (48)))).NumPut(0, "UInt", cbSize, "UInt", style, "Ptr", lpfnWndProc, "Int", cbClsExtra, "Int", cbWndExtra, "Ptr", hInstance, "Ptr", hIcon, "Ptr", hCursor, "Ptr", hbrBackground, "Ptr", lpszMenuName, "Ptr", lpszClassName, "Ptr", hIconSm)
+
+		return (s)
+	}  ;? WNDCLASSEXA, *PWNDCLASSEXA, *NPWNDCLASSEXA, *LPWNDCLASSEXA;
+
 	;* Structure.CreateCursorInfo([flags, cursor, [Structure] screenPos])
 	;* Description:
-		;* Contains global cursor information.
-	static CreateCursorInfo(flags := 0, cursor := 0, screenPos := "") {
-		if (!screenPos) {
+		;* See https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-cursorinfo.
+	static CreateCursorInfo(flags := 0, cursor := 0, screenPos := unset) {
+		if (!(IsSet(screenPos))) {
 			screenPos := this.CreatePoint(0, 0, "UInt")
 		}
 
-		(s := this(16 + A_PtrSize)).NumPut(0, "UInt", 16 + A_PtrSize, "UInt", flags, "Ptr", cursor, "Struct", screenPos)  ;: https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-cursorinfo
+		(s := this(A_PtrSize + 16)).NumPut(0, "UInt", A_PtrSize + 16, "UInt", flags, "Ptr", cursor, "Struct", screenPos)
 
 		return (s)
 	}  ;? CURSORINFO, *PCURSORINFO, *LPCURSORINFO;
 
 	;* Structure.CreateSecurityDescriptor()
 	;* Description:
-		;* The SECURITY_DESCRIPTOR structure contains the security information associated with an object. Applications use this structure to set and query an object's security status.
+		;* See https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-security_descriptor.
 	static CreateSecurityDescriptor() {
-		s := this(8 + A_PtrSize*4 - 4*(A_PtrSize == 4))  ;: https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-security_descriptor
+		s := this(A_PtrSize*4 - 4*(A_PtrSize == 4) + 8)
 
 		return (s)
 	}  ;? SECURITY_DESCRIPTOR, *PISECURITY_DESCRIPTOR;
 
 	;* Structure.CreateGDIplusStartupInput()
 	;* Description:
-		;* The GdiplusStartupInput structure holds a block of arguments that are required by the GdiplusStartup function.
+		;* See https://docs.microsoft.com/en-us/windows/win32/api/gdiplusinit/ns-gdiplusinit-gdiplusstartupinput.
 	static CreateGDIplusStartupInput() {
-		(s := this(8 + A_PtrSize*2)).NumPut(0, "UInt", 0x1)  ;: https://docs.microsoft.com/en-us/windows/win32/api/gdiplusinit/ns-gdiplusinit-gdiplusstartupinput
+		(s := this(A_PtrSize*2 + 8, True)).NumPut(0, "UInt", 0x1)
 
 		return (s)
 	}
 
 	;* Structure.CreateConsoleReadConsoleControl([initialChars, ctrlWakeupMask, controlKeyState])
 	;* Description:
-		;* Contains information for a console read operation.
-	;* Parameters:
+		;* See https://docs.microsoft.com/en-us/windows/console/console-readconsole-control.
+	;* Parameter:
 		;* ctrlWakeupMask - See https://www.asciitable.com/.
 	static CreateConsoleReadConsoleControl(initialChars := 0, ctrlWakeupMask := 0x0A, controlKeyState := 0) {
-		(s := this(16)).NumPut(0, "UInt", 16, "UInt", initialChars, "UInt", ctrlWakeupMask, "UInt", controlKeyState)  ;: https://docs.microsoft.com/en-us/windows/console/console-readconsole-control
+		(s := this(16)).NumPut(0, "UInt", 16, "UInt", initialChars, "UInt", ctrlWakeupMask, "UInt", controlKeyState)
 
 		return (s)
 	}  ;? CONSOLE_READCONSOLE_CONTROL, *PCONSOLE_READCONSOLE_CONTROL;
 
 	;* Structure.CreateSmallRect([x, y, width, height])
 	;* Description:
-		;* Defines the coordinates of the upper left and lower right corners of a rectangle.
+		;* See https://docs.microsoft.com/en-us/windows/console/small-rect-str.
 	static CreateSmallRect(x := 0, y := 0, width := 0, height := 0) {
-		(s := this(8)).NumPut(0, "Short", x, "Short", y, "Short", x + width - 1, "Short", y + height - 1)  ;: https://docs.microsoft.com/en-us/windows/console/small-rect-str
+		(s := this(8)).NumPut(0, "Short", x, "Short", y, "Short", x + width - 1, "Short", y + height - 1)
 
 		return (s)
 	}  ;? SMALL_RECT;
 
 	;* Structure.CreateCoord([x, y])
 	;* Description:
-		;* Defines the coordinates of a character cell in a console screen buffer. The origin of the coordinate system (0,0) is at the top, left cell of the buffer.
+		;* See https://docs.microsoft.com/en-us/windows/console/coord-str.
 	static CreateCoord(x := 0, y := 0) {
-		(s := this(4)).NumPut(0, "Short", x, "Short", y)  ;: https://docs.microsoft.com/en-us/windows/console/coord-str
+		(s := this(4)).NumPut(0, "Short", x, "Short", y)
 
 		return (s)
 	}  ;? COORD, *PCOORD;
 
 	;* Structure.CreatePoint([x, y, type])
 	;* Description:
-		;* The POINT structure defines the x- and y-coordinates of a point.
+		;* See https://docs.microsoft.com/en-us/windows/win32/api/windef/ns-windef-point.
 	static CreatePoint(x := 0, y := 0, type := "UInt") {
 		if (!(type ~= "i)Float|Int|UInt")) {
 			throw (ValueError(Format("{} is invalid.", Print(type)), -1))
 		}
 
-		(s := this(8)).NumPut(0, type, x, type, y)  ;: https://docs.microsoft.com/en-us/windows/win32/api/windef/ns-windef-point
+		(s := this(8)).NumPut(0, type, x, type, y)  ;:
 
 		return (s)
 	}  ;? POINT, *PPOINT, *NPPOINT, *LPPOINT;
 
 	;* Structure.CreateRect([x, y, width, height, type])
 	;* Description:
-		;* The RECT structure defines a rectangle by the coordinates of its upper-left and lower-right corners.
+		;* See https://docs.microsoft.com/en-us/windows/win32/api/windef/ns-windef-rect.
 	static CreateRect(x := 0, y := 0, width := 0, height := 0, type := "UInt") {
 		if (!(type ~= "i)Float|Int|UInt")) {
 			throw (ValueError(Format("{} is invalid.", Print(type)), -1))
 		}
 
-		(s := this(16)).NumPut(0, type, x, type, y, type, width, type, height)  ;: https://docs.microsoft.com/en-us/windows/win32/api/windef/ns-windef-rect
+		(s := this(16)).NumPut(0, type, x, type, y, type, width, type, height)
 
 		return (s)
 	}  ;? RECT, *PRECT, *NPRECT, *LPRECT;
 
 	;* Structure.CreateBitmapData([width, height, stride, pixelFormat, scan0])
 	;* Description:
-		;* The BitmapData class stores attributes of a bitmap.
+		;* See https://docs.microsoft.com/en-us/previous-versions/ms534421(v=vs.85).
 	static CreateBitmapData(width := 0, height := 0, stride := 0, pixelFormat := 0x26200A, scan0 := 0) {
-		(s := this(16 + A_PtrSize*2)).NumPut(0, "UInt", width, "UInt", height, "Int", stride, "Int", pixelFormat, "Ptr", scan0)  ;: https://docs.microsoft.com/en-us/previous-versions/ms534421(v=vs.85)
+		(s := this(A_PtrSize*2 + 16)).NumPut(0, "UInt", width, "UInt", height, "Int", stride, "Int", pixelFormat, "Ptr", scan0)
 
 		return (s)
 	}  ;? BITMAPDATA;
 
 	;* Structure.CreateBitmapInfo([Structure] bmiHeader, [Structure] bmiColors)
 	;* Description:
-		;* The BITMAPINFO structure defines the dimensions and color information for a DIB.
+		;* See https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapinfo.
 	static CreateBitmapInfo(bmiHeader, bmiColors) {
-		return (StructureFromStructure(bmiHeader, bmiColors))  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapinfo
+		return (StructureFromStructure(bmiHeader, bmiColors))
 	}  ;? BITMAPINFO, *LPBITMAPINFO, *PBITMAPINFO;
 
 	;* Structure.CreateBitmapInfoHeader(width, height[, bitCount, compression, sizeImage, xPelsPerMeter, yPelsPerMeter, clrUsed, clrImportant])
 	;* Description:
-		;* The BITMAPINFOHEADER structure contains information about the dimensions and color format of a DIB.
+		;* See https://docs.microsoft.com/en-us/previous-versions/dd183376(v=vs.85).
 	static CreateBitmapInfoHeader(width, height, bitCount := 32, compression := 0x0000, sizeImage := 0, xPelsPerMeter := 0, yPelsPerMeter := 0, clrUsed := 0, clrImportant := 0) {
-		(s := this(40)).NumPut("UInt", 40, "Int", width, "Int", height, "UShort", 1, "UShort", bitCount, "UInt", compression, "UInt", sizeImage, "Int", xPelsPerMeter, "Int", yPelsPerMeter, "UInt", clrUsed, "UInt", clrImportant)  ;: https://docs.microsoft.com/en-us/previous-versions/dd183376(v=vs.85)
+		(s := this(40)).NumPut(0, "UInt", 40, "Int", width, "Int", height, "UShort", 1, "UShort", bitCount, "UInt", compression, "UInt", sizeImage, "Int", xPelsPerMeter, "Int", yPelsPerMeter, "UInt", clrUsed, "UInt", clrImportant)
 
 		return (s)
 	}  ;? BITMAPINFOHEADER, *PBITMAPINFOHEADER;
 
 	;* Structure.CreateBlendFunction([sourceConstantAlpha, alphaFormat])
 	;* Description:
-		;* The BLENDFUNCTION structure controls blending by specifying the blending functions for source and destination bitmaps.
+		;* See https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-blendfunction, https://www.teamdev.com/downloads/jniwrapper/winpack/javadoc/constant-values.html#com.jniwrapper.win32.gdi.BlendFunction.AC_SRC_OVER.
 	;~ Note:
 		;~ When the AlphaFormat member is AC_SRC_ALPHA, the source bitmap must be 32 bpp. If it is not, the AlphaBlend function will fail.
 	static CreateBlendFunction(sourceConstantAlpha := 255, alphaFormat := 1) {
-		(s := this(4, 1)).NumPut(2, "UChar", sourceConstantAlpha, "UChar", alphaFormat)  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-blendfunction, https://www.teamdev.com/downloads/jniwrapper/winpack/javadoc/constant-values.html#com.jniwrapper.win32.gdi.BlendFunction.AC_SRC_OVER
+		(s := this(4, True)).NumPut(2, "UChar", sourceConstantAlpha, "UChar", alphaFormat)
 
 		return (s)
 	}  ;? BLENDFUNCTION, *PBLENDFUNCTION;
 
 	;* Structure.CreateRGBQuad([rgbBlue, rgbGreen, rgbRed])
 	;* Description:
-		;* The RGBQUAD structure describes a color consisting of relative intensities of red, green, and blue.
+		;* See https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-rgbquad#members.
 	static CreateRGBQuad(blue := 0, green := 0, red := 0) {
-		(s := this(4, 1)).NumPut(0, "UChar", blue, "UChar", green, "UChar", red)  ;: https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-rgbquad#members
+		(s := this(4, True)).NumPut(0, "UChar", blue, "UChar", green, "UChar", red)
 
 		return (s)
 	}  ;? RGBQUAD;
 
 	;* Structure.CreateSize(width, height)
 	;* Description:
-		;* The SIZE structure specifies the width and height of a rectangle.
+		;* See https://docs.microsoft.com/en-us/previous-versions//dd145106(v=vs.85).
 	static CreateSize(width, height) {
-		(s := this(8)).NumPut(0, "Int", width, "Int", height)  ;: https://docs.microsoft.com/en-us/previous-versions//dd145106(v=vs.85)
+		(s := this(8)).NumPut(0, "Int", width, "Int", height)
 
 		return (s)
 	}  ;? SIZE, *PSIZE;
 
 	;* Structure(bytes[, zero])
-	__New(bytes, zero := 0) {
+	__New(bytes, zero := False) {
 		if (!(IsInteger(bytes) && bytes >= 0)) {
 			throw (ValueError(Format("{} is invalid.", Print(bytes)), -1, "This parameter must be a non negative integer."))
 		}
 
-		this.Ptr := DllCall("Kernel32\HeapAlloc", "Ptr", Structure.Heap, "UInt", (zero) ? (0x00000008) : (0), "Ptr", bytes, "Ptr")  ;~ Heap allocations made by calling the malloc and HeapAlloc functions are non-executable.
+		this.Ptr := DllCall("Kernel32\HeapAlloc", "Ptr", Structure.Heap, "UInt", (zero) ? (0x00000008) : (0x00000000), "Ptr", bytes, "Ptr")  ;~ Heap allocations made by calling the malloc and HeapAlloc functions are non-executable.
 	}
 
 	__Delete() {
-		DllCall("Kernel32\HeapFree", "Ptr", Structure.Heap, "UInt", 0, "Ptr", this.Ptr)
+		try {
+			DllCall("Kernel32\HeapFree", "Ptr", Structure.Heap, "UInt", 0, "Ptr", this.Ptr)
+		}
 	}
 
 	Size {
@@ -234,7 +243,7 @@ Class Structure {
 			throw (ValueError(Format("{} is invalid.", Print(value)), -1, "This parameter must be a non negative integer."))
 		}
 
-		if (!(this.Ptr := DllCall("Kernel32\HeapReAlloc", "Ptr", Structure.Heap, "UInt", 0x00000008, "Ptr", this.Ptr, "Ptr", value, "Ptr"))) {  ;* If HeapReAlloc fails, the original memory is not freed, and the original handle and pointer are still valid.
+		if (!(this.Ptr := DllCall("Kernel32\HeapReAlloc", "Ptr", Structure.Heap, "UInt", 0x00000008, "Ptr", this.Ptr, "Ptr", value, "Ptr"))) {  ;~ If HeapReAlloc fails, the original memory is not freed, and the original handle and pointer are still valid.
 			throw (MemoryError("Kernel32\HeapReAlloc failed to allocate memory."))
 		}
 	}
@@ -277,7 +286,7 @@ Class Structure {
 			index := (A_Index - 1)*2
 				, type := params[index], value := params[index + 1]
 
-			if (type == "Struct") {
+			if (type = "Struct") {
 				if (value.__Class != "Structure") {
 					throw (TypeError(Format("{} is invalid.", Print(value)), -1))
 				}
@@ -315,9 +324,6 @@ Class Structure {
 	}
 
 	ZeroMemory(bytes := 0) {
-		size := this.Size
-			, bytes := (bytes) ? ((bytes > size) ? (size) : (bytes)) : (this.Size)
-
-		DllCall("Ntdll\RtlZeroMemory", "Ptr", this.Ptr, "Ptr", bytes)
+		DllCall("Ntdll\RtlZeroMemory", "Ptr", this.Ptr, "Ptr", (bytes) ? ((bytes > (size := this.Size)) ? (size) : (bytes)) : (this.Size))
 	}
 }
