@@ -1,6 +1,6 @@
-# Structure.ahk
+# Structure
 
-A structure management framework for AutoHotkey v2.0.
+A structure management framework for AutoHotkey v2.*
 
 ## Functions
 
