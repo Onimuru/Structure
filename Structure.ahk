@@ -217,9 +217,9 @@ Class Structure {
 	}
 
 	__Delete() {
-		try {
-			DllCall("Kernel32\HeapFree", "Ptr", Structure.Heap, "UInt", 0, "Ptr", this.Ptr)
-		}
+		static hHeap := Structure.Heap
+
+		DllCall("Kernel32\HeapFree", "Ptr", hHeap, "UInt", 0, "Ptr", this.Ptr)
 	}
 
 	Size {
