@@ -56,13 +56,32 @@ Class Structure {
 		return (sizeLookup[type])
 	}
 
+	;* Description:
+		;* See https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-trackmouseevent.
+	static CreateTrackMouseEvent(hWnd, dwFlags := 0x00000002, dwHoverTime := 400) {
+		static cbSize := A_PtrSize*2 + 8
+
+		(s := Structure(cbSize, True)).NumPut(0, "UInt", cbSize, "UInt", dwFlags, "Ptr", hWnd, "UInt", dwHoverTime)
+
+		return (s)
+	}  ;? TRACKMOUSEEVENT, *LPTRACKMOUSEEVENT;
+
+	;* Structure.CreateWndClassEx(style, lpfnWndProc, cbClsExtra, cbWndExtra, hInstance, hIcon, hCursor, hbrBackground, lpszMenuName, lpszClassName, hIconSm)
+	;* Description:
+		;* See https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimageattributes/nf-gdiplusimageattributes-imageattributes-setcolormatrix.
+	static CreateColorMatrix(r := 1, g := 1, b := 1, alpha := 1) {
+		(s := this(100)).NumPut(0, "Float", r, "Float", 0, "Float", 0, "Float", 0, "Float", 0, "Float", 0, "Float", g, "Float", 0, "Float", 0, "Float", 0, "Float", 0, "Float", 0, "Float", b, "Float", 0, "Float", 0, "Float", 0, "Float", 0, "Float", 0, "Float", alpha, "Float", 0, "Float", 0, "Float", 0, "Float", 0, "Float", 0, "Float", 1)
+
+		return (s)
+	}
+
 	;* Structure.CreateWndClassEx(style, lpfnWndProc, cbClsExtra, cbWndExtra, hInstance, hIcon, hCursor, hbrBackground, lpszMenuName, lpszClassName, hIconSm)
 	;* Description:
 		;* See https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-wndclassexa.
 	;* Parameter:
 		;* style - See https://docs.microsoft.com/en-us/windows/win32/winmsg/window-class-styles.
 	static CreateWndClassEx(style, lpfnWndProc, cbClsExtra, cbWndExtra, hInstance, hIcon, hCursor, hbrBackground, lpszMenuName, lpszClassName, hIconSm) {
-		(s := Structure(cbSize := ((A_PtrSize == 8) ? (80) : (48)))).NumPut(0, "UInt", cbSize, "UInt", style, "Ptr", lpfnWndProc, "Int", cbClsExtra, "Int", cbWndExtra, "Ptr", hInstance, "Ptr", hIcon, "Ptr", hCursor, "Ptr", hbrBackground, "Ptr", lpszMenuName, "Ptr", lpszClassName, "Ptr", hIconSm)
+		(s := Structure(cbSize := (A_PtrSize == 8) ? (80) : (48))).NumPut(0, "UInt", cbSize, "UInt", style, "Ptr", lpfnWndProc, "Int", cbClsExtra, "Int", cbWndExtra, "Ptr", hInstance, "Ptr", hIcon, "Ptr", hCursor, "Ptr", hbrBackground, "Ptr", lpszMenuName, "Ptr", lpszClassName, "Ptr", hIconSm)
 
 		return (s)
 	}  ;? WNDCLASSEXA, *PWNDCLASSEXA, *NPWNDCLASSEXA, *LPWNDCLASSEXA;
