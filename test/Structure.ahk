@@ -9,10 +9,10 @@ ProcessSetPriority("Normal")
 
 ;======================================================  Include  ==============;
 
-#Include %A_ScriptDir%\..\..\Core.lib
+#Include %A_ScriptDir%\..\..\Core.ahk
 
-#Include %A_ScriptDir%\..\..\Assert\Assert.lib
-#Include %A_ScriptDir%\..\..\Console\Console.lib
+#Include %A_ScriptDir%\..\..\Assert\Assert.ahk
+#Include %A_ScriptDir%\..\..\Console\Console.ahk
 
 ;======================================================== Test ================;
 
