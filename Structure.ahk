@@ -79,6 +79,15 @@ Class Structure {
 	;* Structure.CreateBitmapInfoHeader(width, height[, bitCount, compression, sizeImage, xPelsPerMeter, yPelsPerMeter, clrUsed, clrImportant])
 	;* Description:
 		;* See https://docs.microsoft.com/en-us/previous-versions/dd183376(v=vs.85).
+	;* Parameter:
+		;* compression:
+			; 0x0000 = BI_RGB - An uncompressed format.
+			; 0x0003 = BI_BITFIELDS - Specifies that the bitmap is not compressed. The members bV4RedMask, bV4GreenMask, and bV4BlueMask specify the red, green, and blue components for each pixel. This is valid when used with 16- and 32-bpp bitmaps.
+			; 0x0002 = BI_RLE4 - A run-length encoded (RLE) format for bitmaps with 4 bpp. The compression format is a 2-byte format consisting of a count byte followed by two word-length color indexes.
+			; 0x0001 = BI_RLE8 - A run-length encoded (RLE) format for bitmaps with 8 bpp. The compression format is a 2-byte format consisting of a count byte followed by a byte containing a color index.
+		;* sizeImage - Specifies the size, in bytes, of the image. It is valid to set this member to zero if the bitmap is in the `BI_RGB` format.
+		;* clrUsed - Specifies the number of color indexes in the color table actually used by the bitmap. If this value is zero, the bitmap uses the maximum number of colors corresponding to the value of the `bitCount` member.
+		;* clrImportant - Specifies the number of color indexes that are considered important for displaying the bitmap. If this value is zero, all colors are important.
 	static CreateBitmapInfoHeader(width, height, bitCount := 32, compression := 0x0000, sizeImage := 0, xPelsPerMeter := 0, yPelsPerMeter := 0, clrUsed := 0, clrImportant := 0) {
 		(s := this(40)).NumPut(0, "UInt", 40, "Int", width, "Int", height, "UShort", 1, "UShort", bitCount, "UInt", compression, "UInt", sizeImage, "Int", xPelsPerMeter, "Int", yPelsPerMeter, "UInt", clrUsed, "UInt", clrImportant)
 		return (s)
@@ -162,10 +171,14 @@ Class Structure {
 		return (s)
 	}  ;? POINT, *PPOINT, *NPPOINT, *LPPOINT;
 
-	;* Structure.CreateRGBQuad([red, green, blue])
+	;* Structure.CreateRGBQuad([blue, green, red])
 	;* Description:
 		;* See https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-rgbquad#members.
-	static CreateRGBQuad(red := 0, green := 0, blue := 0) {
+	;* Parameter:
+		;* blue - Specifies the intensity of blue in the color.
+		;* green - Specifies the intensity of green in the color.
+		;* red - Specifies the intensity of red in the color.
+	static CreateRGBQuad(blue := 0, green := 0, red := 0) {
 		(s := this(4, True)).NumPut(0, "UChar", blue, "UChar", green, "UChar", red)
 		return (s)
 	}  ;? RGBQUAD;
