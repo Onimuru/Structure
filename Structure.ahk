@@ -1,6 +1,8 @@
 ﻿/*
 ** MSDN_Types: https://github.com/jNizM/AutoHotkey_MSDN_Types/blob/master/src/Windows_Data_Types.txt. **
 ** MSDN_Structs: https://www.autohotkey.com/boards/viewtopic.php?f=74&t=30497. **
+
+** x64 software convention: https://docs.microsoft.com/en-us/cpp/build/x64-software-conventions?view=msvc-160#types-and-storage. **
 */
 
 ;============ Auto-execute ====================================================;
@@ -10,16 +12,22 @@
 
 ;============== Function ======================================================;
 
+SizeOf(type) {
+	static sizeLookup := Map("Char", 1, "UChar", 1, "Short", 2, "UShort", 2, "Float", 4, "Int", 4, "UInt", 4, "Double", 8, "Int64", 8, "UInt64", 8, "Ptr", A_PtrSize, "UPtr", A_PtrSize)
+
+	return (sizeLookup[type])
+}
+
 StructureFromArray(array, type := "UInt") {
 	if (array.__Class != "Array") {
 		throw (TypeError(Format("{} is invalid.", Print(array)), -1))
 	}
 
-	if (!(type ~= "i)Char|UChar|Short|UShort|Float|Int|UInt|Int64|UInt64|Ptr|UPtr")) {
+	if (!(type ~= "i)Char|UChar|Short|UShort|Float|Int|UInt|Double|Int64|UInt64|Ptr|UPtr")) {
 		throw (ValueError(Format("{} is invalid.", Print(type)), -1))
 	}
 
-	size := Structure.SizeOf(type)
+	size := SizeOf(type)
 		, pointer := (instance := Structure(array.Length*size)).Ptr
 
 	for index, value in array {
@@ -57,6 +65,12 @@ Class Structure {
 		}
 
 		this.Ptr := DllCall("Kernel32\HeapAlloc", "Ptr", Structure.Heap, "UInt", (zero) ? (0x00000008) : (0x00000000), "Ptr", bytes, "Ptr")  ;~ Heap allocations made by calling the malloc and HeapAlloc functions are non-executable.
+	}
+
+	__Delete() {
+		static hHeap := Structure.Heap
+
+		DllCall("Kernel32\HeapFree", "Ptr", hHeap, "UInt", 0, "Ptr", this.Ptr)
 	}
 
 	;* Structure.CreateBitmapData([width, height, stride, pixelFormat, scan0])
@@ -105,15 +119,39 @@ Class Structure {
 
 	;* Structure.CreateColorMatrix([red, green, blue, alpha])
 	;* Description:
-		;* See https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimageattributes/nf-gdiplusimageattributes-imageattributes-setcolormatrix.blue
+		;* See https://docs.microsoft.com/en-us/windows/win32/api/gdiplusimageattributes/nf-gdiplusimageattributes-imageattributes-setcolormatrix.blue.
 	static CreateColorMatrix(red := 1, green := 1, blue := 1, alpha := 1) {
-		; [1   0   0   0   0]
-		; [0   1   0   0   0]
-		; [0   0   1   0   0]
-		; [0   0   0   1   0]
+		; [r   0   0   0   0]
+		; [0   g   0   0   0]
+		; [0   0   b   0   0]
+		; [0   0   0   a   0]
 		; [0   0   0   0   1]
 
 		(s := this(100, True)).NumPut(0, "Float", red), s.NumPut(24, "Float", green), s.NumPut(48, "Float", blue), s.NumPut(72, "Float", alpha), s.NumPut(96, "Float", 1)
+		return (s)
+	}
+
+	;* Structure.CreateGreyScaleColorMatrix()
+	static CreateGreyScaleColorMatrix(alpha := 1) {
+		; [0.299   0.299   0.299   0   0]
+		; [0.587   0.587   0.587   0   0]
+		; [0.114   0.114   0.114   0   0]
+		; [  0       0       0     a   0]
+		; [  0       0       0     0   1]
+
+		(s := this(100, True)).NumPut(0, "Float", 0.299, "Float", 0.299, "Float", 0.299), s.NumPut(20, "Float", 0.587, "Float", 0.587, "Float", 0.587), s.NumPut(40, "Float", 0.114, "Float", 0.114, "Float", 0.114), s.NumPut(72, "Float", alpha), s.NumPut(96, "Float", 1)
+		return (s)
+	}
+
+	;* Structure.CreateNegativeColorMatrix()
+	static CreateNegativeColorMatrix(alpha := 1) {
+		; [-1    0    0   0   0]
+		; [ 0   -1    0   0   0]
+		; [ 0    0   -1   0   0]
+		; [ 0    0    0   a   0]
+		; [ 1    1    1   0   1]
+
+		(s := this(100, True)).NumPut(0, "Float", -1), s.NumPut(24, "Float", -1), s.NumPut(48, "Float", -1), s.NumPut(72, "Float", alpha), s.NumPut(80, "Float", 1, "Float", 1, "Float", 1, "Float", 0, "Float", 1)
 		return (s)
 	}
 
@@ -149,13 +187,9 @@ Class Structure {
 	;* Description:
 		;* See https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-cursorinfo.
 	static CreateCursorInfo(flags := 0, cursor := 0, screenPos := unset) {
-		if (!IsSet(screenPos)) {
-			screenPos := this.CreatePoint(0, 0, "UInt")
-		}
-
 		static cbSize := A_PtrSize + 16
 
-		(s := this(cbSize)).NumPut(0, "UInt", cbSize, "UInt", flags, "Ptr", cursor, "Struct", screenPos)
+		(s := this(cbSize)).NumPut(0, "UInt", cbSize, "UInt", flags, "Ptr", cursor, "Struct", (IsSet(screenPos)) ? (screenPos) : (this.CreatePoint(0, 0, "UInt")))
 		return (s)
 	}  ;? CURSORINFO, *PCURSORINFO, *LPCURSORINFO;
 
@@ -243,18 +277,6 @@ Class Structure {
 		return (s)
 	}  ;? WNDCLASSEXA, *PWNDCLASSEXA, *NPWNDCLASSEXA, *LPWNDCLASSEXA;
 
-	static SizeOf(type) {
-		static sizeLookup := Map("Char", 1, "UChar", 1, "Short", 2, "UShort", 2, "Float", 4, "Int", 4, "UInt", 4, "Int64", 8, "UInt64", 8, "Ptr", A_PtrSize, "UPtr", A_PtrSize)
-
-		return (sizeLookup[type])
-	}
-
-	__Delete() {
-		static hHeap := Structure.Heap
-
-		DllCall("Kernel32\HeapFree", "Ptr", hHeap, "UInt", 0, "Ptr", this.Ptr)
-	}
-
 	Size {
 		Get {
 			return (this.GetSize())
@@ -286,7 +308,7 @@ Class Structure {
 			throw (ValueError(Format("{} is invalid.", Print(offset)), -1, "This parameter must be a non negative integer."))
 		}
 
-		if (type ~= "i)Struct|Structure") {  ;* Create and return a new struct from a slice of another.
+		if (type ~= "i)Struct") {  ;* Create and return a new struct from a slice of another.
 			if (!(IsInteger(bytes) && bytes >= 0)) {
 				throw (ValueError(Format("{} is invalid.", Print(bytes)), -1, "This parameter must be a non negative integer."))
 			}
@@ -299,7 +321,7 @@ Class Structure {
 			return (instance)
 		}
 		else {
-			if (!(type ~= "i)Char|UChar|Short|UShort|Float|Int|UInt|Int64|UInt64|Ptr|UPtr")) {
+			if (!(type ~= "i)Char|UChar|Short|UShort|Float|Int|UInt|Double|Int64|UInt64|Ptr|UPtr")) {
 				throw (ValueError(Format("{} is invalid.", Print(type)), -1))
 			}
 
@@ -314,7 +336,7 @@ Class Structure {
 
 		pointer := this.Ptr
 
-		loop (params.Length//2) {
+		loop (params.Length/2) {
 			index := (A_Index - 1)*2
 				, type := params[index], value := params[index + 1]
 
@@ -331,11 +353,11 @@ Class Structure {
 				}
 			}
 			else {
-				if (!(type ~= "i)Char|UChar|Short|UShort|Float|Int|UInt|Int64|UInt64|Ptr|UPtr")) {
+				if (!(type ~= "i)Char|UChar|Short|UShort|Float|Int|UInt|Double|Int64|UInt64|Ptr|UPtr")) {
 					throw (ValueError(Format("{} is invalid.", Print(offset)), -1))
 				}
 
-				size := Structure.SizeOf(type), limit := this.Size - offset
+				size := SizeOf(type), limit := this.Size - offset
 					, bytes := (size > limit) ? (limit) : (size)
 
 				if (!(bytes - size)) {
@@ -347,8 +369,8 @@ Class Structure {
 		return (offset)  ;* Similar to `array.Push()` returning the new length.
 	}
 
-	StrGet(length := "", encoding := "") {
-		if (length) {
+	StrGet(length := unset, encoding := "CP0") {
+		if (IsSet(length)) {
 			return (StrGet(this.Ptr, length, encoding))
 		}
 
