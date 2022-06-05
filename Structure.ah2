@@ -1,14 +1,11 @@
-﻿/*
+#Requires AutoHotkey v2.0-beta
+
+/*
 ** MSDN_Types: https://github.com/jNizM/AutoHotkey_MSDN_Types/blob/master/src/Windows_Data_Types.txt. **
 ** MSDN_Structs: https://www.autohotkey.com/boards/viewtopic.php?f=74&t=30497. **
 
 ** x64 software convention: https://docs.microsoft.com/en-us/cpp/build/x64-software-conventions?view=msvc-160#types-and-storage. **
 */
-
-;============ Auto-execute ====================================================;
-;======================================================  Setting  ==============;
-
-#Requires AutoHotkey v2.0-a134-d3d43350
 
 ;============== Function ======================================================;
 
@@ -55,7 +52,7 @@ StructureFromStructure(structs*) {
 
 ;===============  Class  =======================================================;
 
-Class Structure {
+class Structure {
 	static Heap := DllCall("Kernel32\GetProcessHeap", "Ptr")  ;! DllCall("Kernel32\HeapCreate", "UInt", 0x00000004, "Ptr", 0, "Ptr", 0, "Ptr")
 
 	;* Structure(bytes[, zero])
