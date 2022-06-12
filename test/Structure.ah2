@@ -1,18 +1,21 @@
-﻿;============ Auto-execute ====================================================;
+﻿#Requires AutoHotkey v2.0-beta
+
+;============ Auto-execute ====================================================;
+;======================================================  Include  ==============;
+
+#Include %A_ScriptDir%\..\..\Core.ah2
+
+#Include %A_ScriptDir%\..\..\Assert\Assert.ah2
+#Include %A_ScriptDir%\..\..\Console\Console.ah2
+
 ;======================================================  Setting  ==============;
 
 #SingleInstance
 #Warn All, MsgBox
 #Warn LocalSameAsGlobal, Off
 
+ListLines(False)
 ProcessSetPriority("Normal")
-
-;======================================================  Include  ==============;
-
-#Include %A_ScriptDir%\..\..\Core.ahk
-
-#Include %A_ScriptDir%\..\..\Assert\Assert.ahk
-#Include %A_ScriptDir%\..\..\Console\Console.ahk
 
 ;======================================================== Test ================;
 
@@ -100,26 +103,36 @@ loop ((size := struct.Size)//4) {
 }
 Assert.IsEqual(contents013, "1, 2, 3, 4, 5, 6")  ;* Test that the data was coppied correctly.
 
+;--------------------------------------------------------  Log  ----------------;
+
 Console.Log(Assert.CreateReport())
 
-exit
+;=======================================================  Other  ===============;
+
+Exit()
 
 ;=============== Hotkey =======================================================;
 
-#HotIf (WinActive(A_ScriptName) || WinActive("Structure.ahk"))
+#HotIf (WinActive(A_ScriptName))
 
 	$F10:: {
-		ListVars
+		ListVars()
+
+		KeyWait("F10")
 	}
 
 	~$^s:: {
 		Critical(True)
 
 		Sleep(200)
-		Reload
+		Reload()
 	}
 
 #HotIf
+
+~$Escape:: {
+	ExitApp()
+}
 
 ;============== Function ======================================================;
 
