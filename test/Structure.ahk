@@ -3,10 +3,10 @@
 ;============ Auto-execute ====================================================;
 ;======================================================  Include  ==============;
 
-#Include %A_ScriptDir%\..\..\Core.ah2
+#Include %A_ScriptDir%\..\..\Core.ahk
 
-#Include %A_ScriptDir%\..\..\Assert\Assert.ah2
-#Include %A_ScriptDir%\..\..\Console\Console.ah2
+#Include %A_ScriptDir%\..\..\Assert\Assert.ahk
+#Include %A_ScriptDir%\..\..\Console\Console.ahk
 
 ;======================================================  Setting  ==============;
 
